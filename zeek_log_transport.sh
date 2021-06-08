@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#Version 0.3.9
+#Version 0.4.0
 
-#This sends any bro/zeek logs less than three days old to the rita/aihunter server.  It only sends logs of these types:
-#conn., dns., http., ssl., x509., and known_certs.  Any logs that already exist on the target system are not retransferred.
+#This sends any bro/zeek logs to the rita/aihunter server.  It sends logs of all types.
+#Any logs that already exist on the target system are not retransferred.
 
 #Before using this, run these on the rita/aihunter server (use zeek in place of bro if necesssary):
 #sudo adduser dataimport
