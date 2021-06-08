@@ -227,26 +227,14 @@ if [ -z "$remote_top_dir" ]; then
 	remote_top_dir="/opt/$ids_name/remotelogs/$my_id/"
 fi
 
-today=`date '+%Y-%m-%d'`
-yesterday=`date '+%Y-%m-%d' --date=yesterday`
-twoda=`date '+%Y-%m-%d' --date='2 days ago'`
-threeda=`date '+%Y-%m-%d' --date='3 days ago'`
-
 status "Sending logs to rita/aihunter server $aih_location , My name: $my_id , local dir: $local_tld , remote dir: $remote_top_dir"
 
 status "Preparing remote directories"
-ssh $extra_ssh_params "$aih_location" "mkdir -p ${remote_top_dir}/$today/ ${remote_top_dir}/$yesterday/ ${remote_top_dir}/$twoda/ ${remote_top_dir}/$threeda/ ${remote_top_dir}/current/"
+ssh $extra_ssh_params "$aih_location" "mkdir -p ${remote_top_dir}"
 
 cd "$local_tld" || fail "Unable to change to $local_tld"
-send_candidates=`find . -type f -mtime -3 -iname '*.gz' | egrep '(conn|dns|http|ssl|x509|known_certs)' | sort -u`
-if  [ ${#send_candidates} -eq 0 ]; then
-	echo
-	printf "WARNING: No logs found, if your log directory is not $local_tld please use the flag: --localdir [bro_zeek_log_directory]"
-	echo
-
-fi
 status "Transferring files to $aih_location"
-flock -xn "$HOME/rsync_log_transport.lck" timeout --kill-after=60 7080 $nice_me rsync $rsyncparams -avR -e "ssh $extra_ssh_params" $send_candidates "$aih_location:${remote_top_dir}/" --delay-updates --chmod=Do+rx,Fo+r
+flock -xn "$HOME/rsync_log_transport.lck" $nice_me rsync $rsyncparams -avR -e "ssh $extra_ssh_params" . "$aih_location:${remote_top_dir}/" --delay-updates --chmod=Do+rx,Fo+r
 retval=$?
 if [ "$retval" == "1" ]; then
 	status "Unable to obtain lock and run a new copy of rsync as the previous rsync appears to still be running."
